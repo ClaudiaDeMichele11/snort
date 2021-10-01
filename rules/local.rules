@@ -1,0 +1,64 @@
+# Copyright 2001-2021 Sourcefire, Inc. All Rights Reserved.
+#
+# This file contains (i) proprietary rules that were created, tested and certified by
+# Sourcefire, Inc. (the "VRT Certified Rules") that are distributed under the VRT
+# Certified Rules License Agreement (v 2.0), and (ii) rules that were created by
+# Sourcefire and other third parties (the "GPL Rules") that are distributed under the
+# GNU General Public License (GPL), v2.
+# 
+# The VRT Certified Rules are owned by Sourcefire, Inc. The GPL Rules were created
+# by Sourcefire and other third parties. The GPL Rules created by Sourcefire are
+# owned by Sourcefire, Inc., and the GPL Rules not created by Sourcefire are owned by
+# their respective creators. Please see http://www.snort.org/snort/snort-team/ for a
+# list of third party owners and their respective copyrights.
+# 
+# In order to determine what rules are VRT Certified Rules or GPL Rules, please refer
+# to the VRT Certified Rules License Agreement (v2.0).
+#
+#-------------
+# LOCAL RULES
+#-------------
+
+#alert icmp any any -> any any (msg:"Testing ICMP"; sid:1000001;)
+#alert tcp any any -> any any (msg:"Testing TCP"; sid:1000002;)
+#alert udp any any -> any any (msg:"Testing UDP"; sid:1000003;)
+#alert tcp any any -> any 80 (msg: "Sample alert";classtype:misc-attack; sid: 1000004;      rev:1;)
+#alert tcp any any -> any 25 (msg:"SMTP expn root"; flags:A+; content:"expn root"; nocase; classtype:attempted-recon; sid: 1000005;)
+#alert tcp any any -> any 80 (msg: "EXPLOIT ntpdx overflow"; dsize: > 128; classtype:attempted-admin; priority:10; sid: 1000006;)
+
+#alert icmp any any -> any any (msg:"ICMP test detected"; GID:1; sid:1000007; rev:001; classtype:icmp-event;)
+#alert icmp any any -> any any (msg:”Possible Nmap ping sweep”;GID:1;sid:1000008;rev:001;classtype:web-application-attack; dsize:0; )
+#alert tcp any 22 -> any any ( sid: 1810; rev: 3; msg: "ATTACK- RESPONSES successful gobbles ssh exploit (GOBBLE)"; flow: from_server,established; content: "|2a|GOBBLE|2a|"; reference: bugtraq,5093; classtype: successful-admin;)
+
+
+#alert tcp any any -> any any (msg:"DOS Land attack"; id:3868; seq: 3868; flags:S; reference:cve,CVE-1999-0016; classtype:attempted-dos; sid:269; rev:3;)
+#alert tcp any 902 -> any any ( sid: 1760; rev: 2; msg: "OTHER- IDS ISS RealSecure 6 event collector connection attempt"; flow: from_server,established; content: "6ISS ECNRA Built-In Provider, Strong Encryption"; offset: 30; depth: 70; nocase; classtype: successful-recon-limited;)
+#alert tcp any any -> any 1433 ( sid: 704; rev: 5; msg: "MS-SQL xp_sprintf possible buffer overflow"; flow: to_server,established; content: "x|00|p|00|_|00|s|00|p|00|r|00|i|00|n|00|t|00|f|00|"; nocase; reference: bugtraq,1204;classtype: attempted-user;)
+#alert tcp any any -> any 25 ( sid: 721; rev: 4; msg: "VIRUS OUTBOUND .pif file attachment"; flow: to_server,established; content:"Content-Disposition|3a|"; content: "filename=|22|"; distance: 0; within: 30; content: ".pif|22|"; distance: 0; within: 30; nocase; classtype: suspicious-filename-detect;)
+#alert tcp any 146 -> any 1024: (msg:"BACKDOOR Infector.1.x"; content: "WHATISIT"; flags: A+; reference:arachnids,315; sid:117; classtype:misc-activity; rev:3;)
+
+
+#alert tcp any any <> any 6699 ( sid: 1000009; rev: 6; msg: "P2P Napster Client Data"; flow: established; content: ".mp3"; nocase; classtype: policy-violation;)
+
+#alert tcp any any -> any any (msg:"Metasploit Meterpreter-ExternalNetwork";GID:1;sid:10000010;rev:001;classtype:trojan-activity;flow:to_server,established;content:"RECV";http_client_body;depth:4;fast_pattern;isdataat:!0,relative;urilen:23<>24,norm;content:"POST";pcre:"/^\/[a-z0-9]{4,5}_[a-z0-9]{16}\/$/Ui";reference:url,blog.didierstevens.com/2015/05/11/detecting-network-traffic-from-metasploits-meterpreter-reverse-http-module/;)
+
+#alert tcp any any -> any any (msg:"Metasploit Meterpreter-InternalNetwork";GID:1;sid:10000011;rev:001;classtype:trojan-activity;flow:to_server,established;content:"RECV";http_client_body;depth:4;fast_pattern;isdataat:!0,relative;urilen:23<>24,norm;content:"POST";pcre:"/^\/[a-z0-9]{4,5}_[a-z0-9]{16}\/$/Ui";reference:url,blog.didierstevens.com/2015/05/11/detecting-network-traffic-from-metasploits-meterpreter-reverse-http-module/;)
+
+#alert tcp any any -> any 80 (flags: S; msg:"Possible TCP DoS";GID:1;sid:10000012;rev:001;classtype:attempted-dos;flow:stateless;threshold:type both,track by_dst,count 70,seconds 10;)
+
+#alert tcp any any -> any 22 (msg:"SCAN SSH BRUTE FORCE login attempt"; GID:1; sid:10000013; rev:001; flow:to_server,established; content:"SSH-"; depth:4; detection_filter:track by_src, count 5, seconds 60; metadata:service ssh; classtype:misc-activity;)
+
+#alert icmp any any -> any any (msg: "Posible Ping of death"; GID:1; sid:10000014; rev:001; dsize: >1510; classtype:misc-activity;)
+
+#alert tcp any any -> any 80 (flags: S; msg:"Possible DoS Attack Type : SYN flood"; flow:stateless; sid:10000015; detection_filter:track by_dst, count 20, seconds 10;)
+
+#alert udp any 19 <> any 7 (msg:"DOS UDP echo+chargen bomb"; classtype:attempted-dos; sid: 10000016;)
+
+#alert tcp any 21 -> any any (msg:"ET SCAN Potential FTP Brute-Force attempt"; flow:from_server,established; dsize:<100; content:"530 "; depth:4; pcre:"/530\s+(Login|User|Failed|Not)/smi"; classtype:unsuccessful-user; threshold: type threshold, track by_dst, count 5, seconds 300; reference:url,doc.emergingthreats.net/2002383; reference:url,www.emergingthreats.net/cgi-bin/cvsweb.cgi/sigs/SCAN/SCAN_FTP_Brute_Force; sid:10000017; rev:11;)
+
+#alert tcp any any -> any 21 (msg:"FTP Potential Brute Force Attack"; flow:to_server,established;content:"530 ";depth:4;pcre:"/530\s+(Login|User|Failed|Not|Logged|In)/smi";content:"Administrator"; nocase;threshold:type threshold, track by_src, count 3,seconds 60; classtype:suspicious-login; sid:10000018;)
+
+
+
+
+#alert tcp $TELNET_SERVERS 23 -> $EXTERNAL_NET any (msg:"TELNET access"; flow:from_server,established; content:"|FF FD 18 FF FD 1F FF FD 23 FF FD 27 FF FD 24|"; classtype:not-suspicious; sid:10000019;)
